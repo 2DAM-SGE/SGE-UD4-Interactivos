@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misión: Digitalizar Taberna de Moe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Roboto:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fdfbf7; /* Warm neutral */
+            color: #1f2937;
+        }
+        
+        .font-hand {
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        /* Custom Scrollbar for code blocks */
+        .code-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .code-scroll::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #15803d; /* green-700 */
+            color: #15803d;
+            font-weight: bold;
+        }
+        
+        .tab-inactive {
+            color: #6b7280;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-green-800 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🍺</span>
+                    <a href="../index.html" class="font-hand text-2xl tracking-wider font-bold hover:text-green-200 transition">Taberna de Moe Ops</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="../index.html" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition">← Volver al Hub</a>
+                        <button onclick="navigateTo('home')" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition">Inicio</button>
+                        <button onclick="navigateTo('phase0')" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition">Fase 0: Setup</button>
+                        <button onclick="navigateTo('task1')" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition">Tarea 1</button>
+                        <button onclick="navigateTo('task2')" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition">Tarea 2</button>
+                        <button onclick="navigateTo('delivery')" class="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition">Entrega</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- SECTION: HOME / MISSION BRIEFING -->
+        <section id="home" class="fade-in space-y-8">
+            <div class="text-center space-y-4">
+                <h1 class="text-4xl md:text-5xl font-bold text-green-900 font-hand">Proyecto: Digitalizando a Moe</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Moe Szyslak se pasa a la nube. Tu misión es configurar el entorno AWS, conectar VS Code, y crear la primera app de gestión para evitar que Barney rompa el servidor.
+                </p>
+                <div class="flex justify-center gap-4 mt-6">
+                    <span class="bg-gray-100 border border-gray-300 px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
+                        ☁️ AWS Academy
+                    </span>
+                    <span class="bg-purple-100 border border-purple-300 px-4 py-2 rounded-full text-sm font-semibold text-purple-800 flex items-center gap-2">
+                        🐳 Odoo 18 (Docker)
+                    </span>
+                    <span class="bg-blue-100 border border-blue-300 px-4 py-2 rounded-full text-sm font-semibold text-blue-800 flex items-center gap-2">
+                        🔧 VS Code SSH
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mt-12">
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-amber-500">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">📜 Contexto</h2>
+                    <p class="text-gray-600 mb-4">
+                        El servidor local es un peligro (cables + Barney = desastre). Nos mudamos a una instancia Ubuntu 24.04 en AWS.
+                        Necesitamos seguridad máxima: nada de contraseñas, todo por <strong>SSH</strong>.
+                    </p>
+                    <button onclick="navigateTo('phase0')" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded transition">
+                        Comenzar Configuración
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">🎯 Objetivos</h2>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span> Configurar VS Code Remote SSH.
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span> Configurar Git con llaves SSH.
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span> Crear módulo "Hola Mundo" (Tarea 1).
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span> Implementar "Gestión de Barra" con lógica Python (Tarea 2).
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: PHASE 0 - SETUP -->
+        <section id="phase0" class="hidden fade-in space-y-8">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-3xl font-bold text-gray-900">🛠️ Fase 0: Preparando el Chiringuito</h2>
+                <p class="text-gray-600 mt-2">Configuración del entorno de combate. Sin esto, no hay código.</p>
+            </div>
+
+            <!-- Step 1: VS Code SSH -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800">1. Conexión VS Code (Remote SSH)</h3>
+                </div>
+                <div class="p-6">
+                    <p class="mb-4 text-gray-600">Edita tu archivo de configuración SSH (F1 > Remote-SSH: Open config) y elige tu sistema operativo:</p>
+                    
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-200 mb-4">
+                        <button onclick="switchOS('windows')" id="tab-windows" class="tab-active px-4 py-2 text-sm font-medium focus:outline-none">Windows</button>
+                        <button onclick="switchOS('maclinux')" id="tab-maclinux" class="tab-inactive px-4 py-2 text-sm font-medium focus:outline-none">Mac / Linux</button>
+                    </div>
+
+                    <!-- Code Block -->
+                    <div class="relative bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 overflow-x-auto code-scroll">
+                        <pre id="code-ssh-config">Host TabernaMoeAWS
+    # ⚠️ Actualiza la IP cada vez que reinicies el lab
+    HostName IP_ACTUAL_DE_TU_INSTANCIA
+    User ubuntu
+    
+    # WINDOWS
+    IdentityFile "C:\Users\TuUsuario\Downloads\vockey.pem"</pre>
+                        <button onclick="copyCode('code-ssh-config')" class="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded">Copiar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: GitHub SSH -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800">2. GitHub sin Contraseñas</h3>
+                </div>
+                <div class="p-6 grid lg:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-green-800">A. Generar Llaves</h4>
+                        <p class="text-sm text-gray-600">Ejecuta en la terminal integrada de VS Code (conectada a AWS):</p>
+                        <div class="bg-gray-900 rounded p-3 font-mono text-xs text-gray-300">
+                            ssh-keygen -t rsa -b 4096<br>
+                            # Guardar en: /home/ubuntu/.ssh/github
+                        </div>
+                        
+                        <h4 class="font-bold text-green-800">B. Configurar Host</h4>
+                        <p class="text-sm text-gray-600">En <code>~/.ssh/config</code>:</p>
+                        <div class="bg-gray-900 rounded p-3 font-mono text-xs text-gray-300">
+                            Host github.com<br>
+                            &nbsp;&nbsp;HostName github.com<br>
+                            &nbsp;&nbsp;User git<br>
+                            &nbsp;&nbsp;IdentityFile ~/.ssh/github
+                        </div>
+                    </div>
+                    <div class="space-y-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                        <h4 class="font-bold text-green-800">C. Subir a GitHub</h4>
+                        <ol class="list-decimal list-inside text-sm text-gray-700 space-y-2">
+                            <li>Ejecuta <code>cat ~/.ssh/github.pub</code></li>
+                            <li>Copia el texto (empieza por <code>ssh-rsa</code>).</li>
+                            <li>Ve a <strong>GitHub.com > Settings > SSH Keys</strong>.</li>
+                            <li>Pega la clave.</li>
+                        </ol>
+                        <div class="mt-4 pt-4 border-t border-green-200">
+                            <h4 class="font-bold text-green-800">D. Clonar Repo</h4>
+                            <code class="block bg-white p-2 rounded border border-green-200 text-xs mt-2 break-all">
+                                git clone git@github.com:tu-usuario/SGE-Pract-tusSIGLAS.git
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: TASK 1 - HELLO WORLD -->
+        <section id="task1" class="hidden fade-in space-y-8">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-3xl font-bold text-gray-900">🧱 Tarea 1: El Primer Ladrillo</h2>
+                <p class="text-gray-600 mt-2">Crear un módulo básico para verificar que Odoo nos hace caso.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Interactive File Tree -->
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Estructura de Archivos</h3>
+                    <p class="text-sm text-gray-500 mb-4">Haz clic para explorar lo que debes crear:</p>
+                    <div class="font-mono text-sm bg-gray-50 p-4 rounded border border-gray-200">
+                        <ul class="space-y-2">
+                            <li class="pl-2">📂 repo-root/</li>
+                            <li class="pl-6 text-gray-400">└── ...</li>
+                            <li class="pl-6">
+                                <details open>
+                                    <summary class="cursor-pointer hover:text-green-600 font-bold text-green-800">📂 taberna_mou_inicio</summary>
+                                    <ul class="pl-6 mt-2 space-y-2 border-l-2 border-green-200">
+                                        <li class="flex items-center gap-2">
+                                            <span>📄</span> 
+                                            <span class="text-gray-700">__init__.py</span>
+                                            <span class="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-500">(Vacío)</span>
+                                        </li>
+                                        <li class="flex items-center gap-2 group cursor-pointer" onclick="showManifestCode()">
+                                            <span>📄</span> 
+                                            <span class="text-blue-600 font-semibold group-hover:underline">__manifest__.py</span>
+                                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Ver código</span>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Code Preview Panel -->
+                <div class="bg-gray-900 p-6 rounded-xl shadow-md text-white flex flex-col justify-center">
+                    <h4 class="text-green-400 font-mono mb-2 text-sm">Contenido: __manifest__.py</h4>
+                    <pre class="text-xs md:text-sm font-mono text-gray-300 whitespace-pre-wrap code-scroll h-64 overflow-y-auto" id="manifest-content">
+{
+    'name': 'Módulo 01 Taberna de Mou',
+    'summary': 'Prueba de conexión AWS-Docker',
+    'description': 'Módulo de prueba...',
+    'author': 'Tu Nombre',
+    'category': 'Productivity',
+    'version': '0.1',
+    'depends': ['base'],
+    'data': [],
+}
+                    </pre>
+                    <div class="mt-4 text-xs text-gray-500 italic">
+                        * Recuerda reiniciar el contenedor y actualizar la lista de aplicaciones en Odoo.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: TASK 2 - BAR LOGIC SIMULATOR -->
+        <section id="task2" class="hidden fade-in space-y-8">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-3xl font-bold text-gray-900">📊 Tarea 2: Gestión de Barra</h2>
+                <p class="text-gray-600 mt-2">Implementación de la Lógica de Negocio y Modelos. ¿Quién se va a la calle?</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <!-- Column 1: Model Definition -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-600">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">1. Modelo de Datos</h3>
+                        <p class="text-sm text-gray-500 mb-4">Archivo: <code>models.py</code></p>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex justify-between border-b pb-1">
+                                <span class="font-mono text-purple-700">cliente</span>
+                                <span class="text-gray-500">Char</span>
+                            </li>
+                            <li class="flex justify-between border-b pb-1">
+                                <span class="font-mono text-purple-700">descripcion</span>
+                                <span class="text-gray-500">Char</span>
+                            </li>
+                            <li class="flex justify-between border-b pb-1">
+                                <span class="font-mono text-purple-700">nivel_alcohol</span>
+                                <span class="text-gray-500">Integer</span>
+                            </li>
+                            <li class="flex justify-between border-b pb-1 bg-yellow-50 p-1 rounded">
+                                <span class="font-mono text-purple-700 font-bold">expulsar</span>
+                                <span class="text-amber-600 font-bold">Boolean (Compute)</span>
+                            </li>
+                            <li class="flex justify-between">
+                                <span class="font-mono text-purple-700">pagado</span>
+                                <span class="text-gray-500">Boolean</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gray-800 p-4 rounded-xl text-white text-xs font-mono">
+                        <p class="text-green-400 mb-2"># La Regla de la Casa</p>
+                        <pre>if registro.nivel_alcohol > 10:
+    registro.expulsar = True
+else:
+    registro.expulsar = False</pre>
+                    </div>
+                </div>
+
+                <!-- Column 2 & 3: Interactive Simulator -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Simulator Controls -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span>🎮</span> Simulador de Lógica Python
+                        </h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Input Form -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Cliente</label>
+                                    <input type="text" id="sim-client" placeholder="Ej: Barney" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 flex justify-between">
+                                        <span>Nivel de Alcohol</span>
+                                        <span id="alcohol-val" class="font-bold text-green-700">0</span>
+                                    </label>
+                                    <input type="range" id="sim-alcohol" min="0" max="20" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>Sobrio (0)</span>
+                                        <span>Límite (10)</span>
+                                        <span>Coma (20)</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="sim-paid" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                                    <label for="sim-paid" class="ml-2 block text-sm text-gray-900">¿Ha pagado?</label>
+                                </div>
+
+                                <button onclick="addClient()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition transform active:scale-95">
+                                    Procesar Cliente
+                                </button>
+                            </div>
+
+                            <!-- Real-time Status -->
+                            <div class="flex flex-col justify-center items-center bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
+                                <p class="text-sm text-gray-500 uppercase tracking-wide font-semibold mb-2">Estado Calculado</p>
+                                <div id="bouncer-status" class="w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-inner bg-green-100 transition-colors duration-300">
+                                    😊
+                                </div>
+                                <p id="bouncer-text" class="mt-2 font-bold text-green-700">Admitido</p>
+                                <p class="text-xs text-gray-400 mt-1">Computed Field: Expulsar = <span id="computed-bool">False</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization: Chart & List -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Chart -->
+                        <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col">
+                            <h4 class="font-bold text-gray-700 mb-2 text-sm">📊 Distribución de Embriaguez</h4>
+                            <div class="flex-grow flex items-center justify-center">
+                                <div class="chart-container">
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mock Odoo Tree View -->
+                        <div class="bg-white p-4 rounded-xl shadow border border-gray-200 overflow-hidden">
+                            <h4 class="font-bold text-gray-700 mb-2 text-sm">📋 Vista Tree (Previsualización)</h4>
+                            <div class="overflow-y-auto max-h-60 border rounded">
+                                <table class="min-w-full divide-y divide-gray-200 text-xs">
+                                    <thead class="bg-gray-100 sticky top-0">
+                                        <tr>
+                                            <th class="px-2 py-2 text-left font-medium text-gray-500">Cliente</th>
+                                            <th class="px-2 py-2 text-left font-medium text-gray-500">Alcohol</th>
+                                            <th class="px-2 py-2 text-left font-medium text-gray-500">Expulsar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="client-list" class="bg-white divide-y divide-gray-200">
+                                        <!-- Rows added by JS -->
+                                        <tr class="text-gray-400 italic text-center">
+                                            <td colspan="3" class="p-4">Sin clientes aún...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: DELIVERY & BACKUP -->
+        <section id="delivery" class="hidden fade-in space-y-8">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-3xl font-bold text-gray-900">📦 Entrega y Seguridad</h2>
+                <p class="text-gray-600 mt-2">Checklist final antes de cerrar el laboratorio.</p>
+            </div>
+
+            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm mb-8">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">⚠️</span>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-bold text-red-800">COPIA DE SEGURIDAD OBLIGATORIA</h3>
+                        <p class="text-red-700 mt-1">
+                            Antes de apagar AWS, ve a <code>http://tu-ip:8069/web/database/manager</code> y descarga el <strong>.zip</strong>.
+                            Si no lo haces, perderás todos los datos de prueba.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Checklist del Repositorio</h3>
+                <p class="text-sm text-gray-500 mb-4">Asegúrate de que tu GitHub tenga EXACTAMENTE esta estructura:</p>
+                
+                <div class="space-y-2">
+                    <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-green-50 transition" onclick="toggleCheck(this)">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center text-white check-icon">✓</div>
+                        <span class="font-mono text-sm">📂 UD4.Creación/taberna_mou_inicio/__manifest__.py</span>
+                    </div>
+                    <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-green-50 transition" onclick="toggleCheck(this)">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center text-white check-icon">✓</div>
+                        <span class="font-mono text-sm">📂 UD4.Creación/gestion_barra/models.py</span>
+                    </div>
+                    <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-green-50 transition" onclick="toggleCheck(this)">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center text-white check-icon">✓</div>
+                        <span class="font-mono text-sm">📂 UD4.Creación/gestion_barra/views.xml</span>
+                    </div>
+                    <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-green-50 transition" onclick="toggleCheck(this)">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center text-white check-icon">✓</div>
+                        <span class="font-bold text-sm">Comando final: git push</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm">SGE - Unidad 4 - Desarrollo en Odoo | Taberna de Moe</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const state = {
+            currentView: 'home',
+            os: 'windows',
+            clients: [],
+            chartInstance: null
+        };
+
+        // --- Navigation Logic ---
+        function navigateTo(viewId) {
+            // Hide all sections
+            const sections = ['home', 'phase0', 'task1', 'task2', 'delivery'];
+            sections.forEach(s => document.getElementById(s).classList.add('hidden'));
+            
+            // Show target section
+            document.getElementById(viewId).classList.remove('hidden');
+            state.currentView = viewId;
+            
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+            
+            // Initialize Chart if entering task2 for the first time
+            if (viewId === 'task2' && !state.chartInstance) {
+                initChart();
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Phase 0 Logic (OS Tabs) ---
+        function switchOS(os) {
+            state.os = os;
+            const codeBlock = document.getElementById('code-ssh-config');
+            const winTab = document.getElementById('tab-windows');
+            const macTab = document.getElementById('tab-maclinux');
+
+            if (os === 'windows') {
+                winTab.className = "tab-active px-4 py-2 text-sm font-medium focus:outline-none";
+                macTab.className = "tab-inactive px-4 py-2 text-sm font-medium focus:outline-none";
+                codeBlock.textContent = `Host TabernaMoeAWS
+    # ⚠️ Actualiza la IP cada vez que reinicies el lab
+    HostName IP_ACTUAL_DE_TU_INSTANCIA
+    User ubuntu
+    
+    # WINDOWS (Doble barra)
+    IdentityFile "C:\\Users\\TuUsuario\\Downloads\\vockey.pem"`;
+            } else {
+                macTab.className = "tab-active px-4 py-2 text-sm font-medium focus:outline-none";
+                winTab.className = "tab-inactive px-4 py-2 text-sm font-medium focus:outline-none";
+                codeBlock.textContent = `Host TabernaMoeAWS
+    # ⚠️ Actualiza la IP cada vez que reinicies el lab
+    HostName IP_ACTUAL_DE_TU_INSTANCIA
+    User ubuntu
+    
+    # LINUX / MAC
+    IdentityFile "~/Downloads/vockey.pem"`;
+            }
+        }
+
+        function copyCode(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Código copiado al portapapeles');
+            });
+        }
+
+        // --- Task 2 Logic (Simulator) ---
+        const alcoholSlider = document.getElementById('sim-alcohol');
+        const alcoholDisplay = document.getElementById('alcohol-val');
+        const bouncerStatus = document.getElementById('bouncer-status');
+        const bouncerText = document.getElementById('bouncer-text');
+        const computedBool = document.getElementById('computed-bool');
+
+        alcoholSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            alcoholDisplay.textContent = val;
+            updateBouncer(val);
+        });
+
+        function updateBouncer(val) {
+            if (val > 10) {
+                bouncerStatus.innerHTML = '😡';
+                bouncerStatus.classList.remove('bg-green-100');
+                bouncerStatus.classList.add('bg-red-200');
+                bouncerText.textContent = "A LA CALLE";
+                bouncerText.classList.replace('text-green-700', 'text-red-700');
+                computedBool.textContent = "True";
+                computedBool.classList.add('text-red-600', 'font-bold');
+            } else {
+                bouncerStatus.innerHTML = '😊';
+                bouncerStatus.classList.remove('bg-red-200');
+                bouncerStatus.classList.add('bg-green-100');
+                bouncerText.textContent = "Admitido";
+                bouncerText.classList.replace('text-red-700', 'text-green-700');
+                computedBool.textContent = "False";
+                computedBool.classList.remove('text-red-600', 'font-bold');
+            }
+        }
+
+        function addClient() {
+            const nameInput = document.getElementById('sim-client');
+            const name = nameInput.value || "Cliente Anónimo";
+            const alcohol = parseInt(alcoholSlider.value);
+            const expulsar = alcohol > 10;
+            
+            // Add to state
+            state.clients.push({ name, alcohol, expulsar });
+            
+            // Reset Input
+            nameInput.value = "";
+            
+            // Update UI
+            updateClientList();
+            updateChart();
+        }
+
+        function updateClientList() {
+            const tbody = document.getElementById('client-list');
+            tbody.innerHTML = '';
+            
+            state.clients.slice().reverse().forEach(client => {
+                const tr = document.createElement('tr');
+                tr.className = client.expulsar ? "bg-red-50" : "";
+                tr.innerHTML = `
+                    <td class="px-2 py-2 whitespace-nowrap text-gray-900 font-medium">${client.name}</td>
+                    <td class="px-2 py-2 whitespace-nowrap text-gray-500">${client.alcohol}</td>
+                    <td class="px-2 py-2 whitespace-nowrap">
+                        ${client.expulsar 
+                            ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Sí</span>' 
+                            : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">No</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Chart.js Logic ---
+        function initChart() {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            state.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Nivel de Alcohol',
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: '#4b5563',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 20
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!state.chartInstance) return;
+            
+            const labels = state.clients.map(c => c.name);
+            const data = state.clients.map(c => c.alcohol);
+            const colors = state.clients.map(c => c.expulsar ? 'rgba(239, 68, 68, 0.7)' : 'rgba(34, 197, 94, 0.7)'); // Red if expulsar, Green if not
+
+            state.chartInstance.data.labels = labels;
+            state.chartInstance.data.datasets[0].data = data;
+            state.chartInstance.data.datasets[0].backgroundColor = colors;
+            state.chartInstance.update();
+        }
+
+        // --- Delivery Checklist Logic ---
+        function toggleCheck(el) {
+            const iconDiv = el.querySelector('.check-icon');
+            if (iconDiv.classList.contains('bg-green-500')) {
+                iconDiv.classList.remove('bg-green-500', 'border-transparent');
+                iconDiv.classList.add('border-gray-300');
+                el.classList.remove('bg-green-50', 'border-green-200');
+            } else {
+                iconDiv.classList.add('bg-green-500', 'border-transparent');
+                iconDiv.classList.remove('border-gray-300');
+                el.classList.add('bg-green-50', 'border-green-200');
+            }
+        }
+
+    </script>
+</body>
+</html>
