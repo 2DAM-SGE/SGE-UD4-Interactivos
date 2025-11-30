@@ -226,8 +226,10 @@ mkdir UD4.PR0.ec2-desde-AMI
     <p>Sigue los pasos del Manual Interactivo para lanzar la instancia en AWS. Mientras lo haces, crea un documento llamado <span class="file">📄 memoria_despliegue.pdf</span> con las siguientes capturas:</p>
     
     <ul class="checklist">
-        <li><strong>Captura 1 :</strong> Comprobación de acceso al laboratorio (resultado de <code> aws sts get-caller-identity </code> ).</li>
-        <li><strong>Captura 2 :</strong> El comando de lanzamiento en la terminal justo antes de pulsar Enter (debe verse el uso de <code>--user-data file://odoo-boot.sh</code>).</li>
+        <li><strong>Captura 1 :</strong> Comprobación de acceso al laboratorio resultado de:</li>
+        <li><code> aws sts get-caller-identity </code></li>
+        <li><strong>Captura 2 :</strong> El comando de lanzamiento en la terminal justo antes de pulsar Enter, debe verse el uso de:</li>
+        <li><code>--user-data file://odoo-boot.sh</code></li>
         <li><strong>Captura 3 :</strong> La consola de AWS mostrando la instancia en estado "En ejecución" y tipo <code>t4g.small</code>.</li>
         <li><strong>Captura 4 :</strong> Tu terminal SSH mostrando el log final con el mensaje <em>"--- Configuración completada ---"</em>.</li>
         <li><strong>Captura 5 :</strong> El navegador web mostrando Odoo cargando en la IP pública.</li>
