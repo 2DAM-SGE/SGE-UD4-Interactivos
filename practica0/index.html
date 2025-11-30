@@ -47,6 +47,15 @@
         .folder { color: #f1c40f; font-weight: bold; }
         .file { color: #3498db; font-weight: bold; }
 
+        .step-instruction { margin-bottom: 15px; padding-left: 15px; border-left: 3px solid #eee; }
+        
+        /* Tabs for OS selection in Step 1 */
+        .tabs { display: flex; border-bottom: 1px solid #ddd; margin-top: 10px; }
+        .tab { padding: 8px 15px; cursor: pointer; background: #f1f1f1; margin-right: 5px; border-radius: 5px 5px 0 0; border: 1px solid #ddd; border-bottom: none; font-size: 0.9em; color: #666; }
+        .tab.active { background: white; color: var(--primary); font-weight: bold; border-top: 3px solid var(--primary); position: relative; top: 1px; }
+        .tab-content { display: none; border: 1px solid #ddd; padding: 15px; border-radius: 0 5px 5px 5px; background: white; margin-top: -1px; }
+        .tab-content.active { display: block; }
+
         footer { text-align: center; margin-top: 50px; color: #777; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 20px;}
     </style>
 </head>
@@ -72,13 +81,125 @@
         <h3>📋 Requisitos Previos</h3>
         <ul>
             <li>Tener configurado <strong>VS Code</strong> con tu repositorio privado <code>SGE.UD4.PRACT-<span class="dynamic-siglas">SIGLAS</span></code>.</li>
-            <li>Disponer del archivo <code>.pem</code> (claves de AWS).</li>
+            <li>Disponer del archivo <code>.pem</code> (claves de AWS Academy).</li>
+            <li>Añadir un archivo <code>.gitignore</code> que incluya <code>*.pem</code>.</li>
             <li>Tener abierto el manual interactivo <strong><a href="manual_odoo.html" target="_blank" style="color:var(--secondary); text-decoration: none;">manual_odoo.html</a></strong>.</li>
         </ul>
     </div>
 
-    <!-- PASO 1 -->
-    <h2>1. Preparación en VS Code</h2>
+    <!-- PASO 0 -->
+    <h2>0. Preparación Repositorio (Seguridad)</h2>
+    <p>Antes de escribir código, debemos asegurar el entorno para poder conectar con AWS sin exponer nuestras credenciales.</p>
+    
+    <div class="card" style="border-left: 5px solid var(--accent);">
+        <strong>Pasos a seguir obligatoriamente:</strong>
+        <ol>
+            <li>Descarga tu archivo de claves <code>.pem</code> (labsuser.pem o vockey.pem) desde el panel de AWS Academy.</li>
+            <li>Copia ese archivo a la <strong>raíz</strong> de tu repositorio local en VS Code.</li>
+            <li>Crea un archivo llamado <span class="file">.gitignore</span> en la raíz (si no existe ya).</li>
+            <li>Añade la siguiente línea al final del archivo <code>.gitignore</code> para que Git ignore tu clave:</li>
+        </ol>
+        <div class="code-area">
+            <button class="copy-btn" onclick="copyToClipboard('gitignore-code')">Copiar</button>
+<pre id="gitignore-code">
+# Ignorar claves de seguridad AWS
+*.pem
+</pre>
+        </div>
+        <p style="margin-top: 10px; font-size: 0.9em;"><em>Esto asegurará que tu clave privada nunca se suba a GitHub/GitLab.</em></p>
+    </div>
+
+    <!-- PASO 1 - CONFIGURACIÓN CLI -->
+    <h2>1. Configuración AWS CLI (Lab. Project Academy)</h2>
+    <p>Para controlar AWS desde la terminal, necesitamos instalar y configurar la herramienta de línea de comandos (AWS CLI). Las credenciales del laboratorio son temporales y cambian en cada sesión.</p>
+
+    <div class="step-instruction">
+        <strong>1.1. Comprobar e Instalar AWS CLI:</strong><br>
+        Abre una terminal y escribe <code>aws --version</code>. Si aparece un número de versión, salta al paso 1.2. Si no, instálalo según tu sistema operativo:
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchCliTab('win')">Windows</div>
+            <div class="tab" onclick="switchCliTab('lin')">Linux Mint/Ubuntu</div>
+        </div>
+
+        <!-- Windows Install -->
+        <div id="cli-win" class="tab-content active">
+            <p>Descarga e instala el ejecutable oficial:</p>
+            <a href="https://awscli.amazonaws.com/AWSCLIV2.msi" target="_blank" style="background: var(--primary); color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; display: inline-block;">📥 Descargar AWS CLI v2 para Windows</a>
+            <p style="margin-top:10px; font-size:0.9em;"><em>Después de instalar, cierra y vuelve a abrir VS Code para que reconozca el comando.</em></p>
+        </div>
+
+        <!-- Linux Install -->
+        <div id="cli-lin" class="tab-content">
+            <p>Ejecuta estos comandos en tu terminal para instalarlo:</p>
+            <div class="code-area">
+                <button class="copy-btn" onclick="copyToClipboard('install-linux')">Copiar</button>
+<pre id="install-linux">
+sudo apt-get update
+sudo apt-get install awscli -y
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="step-instruction">
+        <strong>1.2. Obtener Credenciales del Lab:</strong><br>
+        En la web de AWS Academy, con el laboratorio iniciado (🟢), haz clic en el botón <strong>AWS Details</strong>. Junto a "AWS CLI", haz clic en <strong>Show</strong>. Copia todo el bloque de texto que aparece.
+    </div>
+
+    <div class="step-instruction">
+        <strong>1.3. Configurar en VS Code:</strong><br>
+        Ejecuta el siguiente comando en la terminal de VS Code para editar tu archivo de credenciales:
+        
+        <div class="code-area" style="margin-bottom: 10px;">
+            <button class="copy-btn" onclick="copyToClipboard('aws-config-cmd')">Copiar</button>
+<pre id="aws-config-cmd">
+# En Windows (PowerShell):
+code $HOME\.aws\credentials
+
+# En Linux/Mac:
+code ~/.aws/credentials
+</pre>
+        </div>
+        <em>(Si el archivo no existe, VS Code te preguntará si quieres crearlo. Di que sí. Si da error de carpeta no encontrada, créala manualmente).</em>
+    </div>
+
+    <div class="step-instruction">
+        <strong>1.4. Pegar y Guardar:</strong><br>
+        Borra cualquier contenido anterior en ese archivo y <strong>pega</strong> el bloque que copiaste de AWS Academy. Debería verse algo así:
+        <div class="code-area" style="background: #eee; color: #555;">
+<pre style="color: #555;">
+[default]
+aws_access_key_id=ASIA...
+aws_secret_access_key=wJalr...
+aws_session_token=IQoJb...
+region=us-east-1  # Comprobar que la Región es correcta
+</pre>
+        </div>
+        Guarda el archivo (Ctrl+S). ¡Ya tienes acceso a AWS desde tu terminal!
+    </div>
+
+    <div class="step-instruction" style="border-left: 3px solid var(--secondary);">
+        <strong>1.5. Comprobar Conexión (Importante):</strong><br>
+        Antes de intentar crear máquinas, verifica que tienes acceso al laboratorio ejecutando este comando en la terminal de VS Code:
+        
+        <div class="code-area">
+            <button class="copy-btn" onclick="copyToClipboard('aws-check-id')">Copiar</button>
+<pre id="aws-check-id">
+aws sts get-caller-identity
+</pre>
+        </div>
+        <p style="margin-top:10px;">Debes recibir una respuesta JSON como esta (si sale error, repite el paso 1.4):</p>
+        <pre style="background: #eee; color: #333; padding: 10px; border-radius: 4px;">
+{
+    "UserId": "AROA...",
+    "Account": "123456789...",
+    "Arn": "arn:aws:sts::...:assumed-role/..."
+}</pre>
+    </div>
+
+    <!-- PASO 2 -->
+    <h2>2. Preparación en VS Code</h2>
     <p>Abre tu repositorio en VS Code y asegúrate de tener todo actualizado. Ejecuta estos comandos en la terminal integrada:</p>
     
     <div class="code-area">
@@ -92,27 +213,28 @@ mkdir UD4.PR0.ec2-desde-AMI
 </pre>
     </div>
 
-    <!-- PASO 2 -->
-    <h2>2. Creación del Script</h2>
+    <!-- PASO 3 -->
+    <h2>3. Creación del Script</h2>
     <p>Dentro de la carpeta <span class="folder">📂 UD4.PR0.ec2-desde-AMI</span> que acabas de crear, debes generar el siguiente archivo:</p>
     <ul>
         <li>Nombre del archivo: <span class="file">📄 odoo-boot.sh</span></li>
         <li><strong>Contenido:</strong> Copia el código del <strong>Paso 1</strong> del archivo <code>manual_odoo.html</code>.</li>
     </ul>
 
-    <!-- PASO 3 -->
-    <h2>3. Ejecución y Documentación</h2>
+    <!-- PASO 4 -->
+    <h2>4. Ejecución y Documentación</h2>
     <p>Sigue los pasos del Manual Interactivo para lanzar la instancia en AWS. Mientras lo haces, crea un documento llamado <span class="file">📄 memoria_despliegue.pdf</span> con las siguientes capturas:</p>
     
     <ul class="checklist">
-        <li><strong>Captura 1:</strong> El comando de lanzamiento en la terminal justo antes de pulsar Enter (debe verse el uso de <code>--user-data file://odoo-boot.sh</code>).</li>
-        <li><strong>Captura 2:</strong> La consola de AWS mostrando la instancia en estado "En ejecución" y tipo <code>t4g.small</code>.</li>
-        <li><strong>Captura 3:</strong> Tu terminal SSH mostrando el log final con el mensaje <em>"--- Configuración completada ---"</em>.</li>
-        <li><strong>Captura 4 (Opcional):</strong> El navegador web mostrando Odoo cargando en la IP pública.</li>
+        <li><strong>Captura 1:</strong> Comprobación de acceso al laboratorio (resultado de <code>aws sts get-caller-identity</code>).</li>
+        <li><strong>Captura 2:</strong> El comando de lanzamiento en la terminal justo antes de pulsar Enter (debe verse el uso de <code>--user-data file://odoo-boot.sh</code>).</li>
+        <li><strong>Captura 3:</strong> La consola de AWS mostrando la instancia en estado "En ejecución" y tipo <code>t4g.small</code>.</li>
+        <li><strong>Captura 4:</strong> Tu terminal SSH mostrando el log final con el mensaje <em>"--- Configuración completada ---"</em>.</li>
+        <li><strong>Captura 5 (Opcional):</strong> El navegador web mostrando Odoo cargando en la IP pública.</li>
     </ul>
 
-    <!-- PASO 4 -->
-    <h2>4. Entrega (Git Workflow)</h2>
+    <!-- PASO 5 -->
+    <h2>5. Entrega (Git Workflow)</h2>
     <p>Sube tu trabajo al repositorio remoto ejecutando los siguientes comandos:</p>
 
     <div class="code-area">
@@ -131,7 +253,7 @@ git push
 
     <div class="warning-box">
         <strong>⚠️ SEGURIDAD CRÍTICA:</strong><br>
-        NUNCA subas tu archivo de claves <code>.pem</code> al repositorio. Si lo haces, tu cuenta de AWS quedará comprometida y suspensa.
+        Verifica una última vez que tu archivo <code>.pem</code> NO está en la lista de archivos añadidos al commit. Si has configurado bien el <code>.gitignore</code> en el Paso 0, Git lo ignorará automáticamente.
     </div>
 
     <footer>
@@ -147,6 +269,19 @@ git push
         spans.forEach(span => {
             span.textContent = initials;
         });
+    }
+
+    function switchCliTab(os) {
+        document.getElementById('cli-win').classList.remove('active');
+        document.getElementById('cli-lin').classList.remove('active');
+        
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => t.classList.remove('active'));
+
+        document.getElementById(`cli-${os}`).classList.add('active');
+        // Simple toggle logic for tabs
+        if(os === 'win') tabs[0].classList.add('active');
+        else tabs[1].classList.add('active');
     }
 
     function copyToClipboard(elementId) {
