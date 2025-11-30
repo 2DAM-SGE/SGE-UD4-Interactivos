@@ -3,217 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual Despliegue Odoo 18 (AWS ARM)</title>
+    <title>Enunciado Práctica UD4.PR0 - SGE</title>
     <style>
         :root {
             --primary: #714B67; /* Odoo Purple */
             --secondary: #00A09D; /* Odoo Teal */
+            --accent: #E5973E; /* Odoo Warning Orange */
             --bg: #f8f9fa;
             --text: #212529;
-            --code-bg: #1e1e1e;
-            --code-text: #d4d4d4;
+            --code-bg: #2d2d2d;
+            --code-text: #f8f8f2;
         }
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
-        h2 { color: var(--secondary); margin-top: 30px; }
-        .setup-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid var(--primary); }
-        .input-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        input[type="text"] { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ced4da; border-radius: 4px; max-width: 300px; }
         
-        /* Code Tabs */
-        .code-wrapper { margin-top: 15px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden; }
-        .tabs { display: flex; background: #f1f1f1; border-bottom: 1px solid #ddd; }
-        .tab { padding: 10px 20px; cursor: pointer; font-weight: bold; color: #666; transition: 0.3s; }
-        .tab:hover { background: #ddd; }
-        .tab.active { background: white; color: var(--primary); border-top: 3px solid var(--primary); }
+        h1 { color: var(--primary); border-bottom: 3px solid var(--secondary); padding-bottom: 15px; margin-top: 0; }
+        h2 { color: var(--secondary); margin-top: 35px; border-left: 4px solid var(--secondary); padding-left: 10px; }
+        h3 { color: #444; margin-top: 25px; }
         
-        /* Code Area */
-        .code-area { position: relative; background: var(--code-bg); padding: 0; }
-        pre { margin: 0; padding: 20px; overflow-x: auto; color: var(--code-text); font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; white-space: pre-wrap; }
-        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 12px; transition: 0.2s; }
+        .setup-box { background: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #dee2e6; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;}
+        .setup-box h3 { margin-top: 0; color: var(--primary); }
+        
+        .input-group { flex-grow: 1; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; color: var(--primary); }
+        input[type="text"] { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ced4da; border-radius: 6px; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--secondary); outline: none; }
+
+        .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        
+        .code-area { position: relative; background: var(--code-bg); padding: 15px; border-radius: 6px; margin-top: 10px; }
+        pre { margin: 0; overflow-x: auto; color: var(--code-text); font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; white-space: pre-wrap; }
+        
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; transition: 0.2s; font-weight: bold; }
         .copy-btn:hover { background: var(--secondary); border-color: var(--secondary); }
 
-        .note { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 0.9em; }
-        .badge-arm { background: #ff9900; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+        .warning-box { background: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; border-left: 5px solid var(--accent); margin-top: 20px; }
+        .checklist { list-style: none; padding: 0; }
+        .checklist li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; }
+        .checklist li::before { content: "📸"; margin-right: 10px; }
+        
+        .file-icon { margin-right: 5px; }
+        .folder { color: #f1c40f; font-weight: bold; }
+        .file { color: #3498db; font-weight: bold; }
+
+        footer { text-align: center; margin-top: 50px; color: #777; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 20px;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🚀 Despliegue Automático Odoo 18 (AWS)</h1>
-    <p>Sigue esta guía para levantar tu servidor en <strong>AWS Academy</strong>. Esta configuración utiliza arquitectura <span class="badge-arm">ARM64</span> (t4g.small) y configura Docker automáticamente.</p>
+    <h1>📝 Práctica UD4.PR0: Despliegue Odoo en AWS</h1>
+    <p><strong>Objetivo:</strong> Automatizar el despliegue de una instancia EC2 en AWS utilizando un script de "User Data" y documentar el proceso de restauración desde una AMI base.</p>
 
+    <!-- ZONA DE PERSONALIZACIÓN -->
     <div class="setup-box">
-        <h3>🛠️ Configuración Inicial</h3>
-        <p>Escribe tus iniciales aquí abajo. El código se actualizará automáticamente.</p>
+        <div style="flex: 1;">
+            <h3>🛠️ Configuración del Entorno</h3>
+            <p style="margin: 0;">Introduce tus iniciales para personalizar los comandos Git.</p>
+        </div>
         <div class="input-group">
             <label for="initials">Tus Siglas (Ej: AMM):</label>
-            <input type="text" id="initials" placeholder="SIGLAS" onkeyup="updateCode()" value="SIGLAS">
+            <input type="text" id="initials" placeholder="TUS_SIGLAS" onkeyup="updateCode()" autofocus>
         </div>
     </div>
 
-    <h2>1. Crear el Script de Arranque</h2>
-    <p>Primero, necesitamos crear el archivo que configurará la máquina. Ejecuta esto en tu terminal para crear el archivo <code>odoo-boot.sh</code>.</p>
+    <div class="card">
+        <h3>📋 Requisitos Previos</h3>
+        <ul>
+            <li>Tener configurado <strong>VS Code</strong> con tu repositorio privado <code>SGE.<span class="dynamic-siglas">SIGLAS</span></code>.</li>
+            <li>Disponer del archivo <code>.pem</code> (claves de AWS).</li>
+            <li>Tener abierto el manual interactivo <strong><a href="manual_odoo.html" target="_blank" style="color:var(--secondary); text-decoration: none;">manual_odoo.html</a></strong>.</li>
+        </ul>
+    </div>
+
+    <!-- PASO 1 -->
+    <h2>1. Preparación en VS Code</h2>
+    <p>Abre tu repositorio en VS Code y asegúrate de tener todo actualizado. Ejecuta estos comandos en la terminal integrada:</p>
     
-    <div class="code-wrapper">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab(1, 'win')">Windows (PowerShell)</div>
-            <div class="tab" onclick="switchTab(1, 'lin')">Linux Mint (Bash)</div>
-        </div>
-        
-        <div id="step1-win" class="code-area">
-            <button class="copy-btn" onclick="copyToClipboard('code1-win')">Copiar</button>
-<pre id="code1-win">
-# En PowerShell, creamos el archivo usando notepad o code
-notepad odoo-boot.sh
+    <div class="code-area">
+        <button class="copy-btn" onclick="copyToClipboard('git-prep')">Copiar</button>
+<pre id="git-prep">
+# Asegurarnos de tener la última versión
+git pull
 
-# (Pega el contenido del script de abajo en el bloc de notas y guarda)
+# Crear la carpeta de la práctica
+mkdir UD4.PR0.ec2-desde-AMI
 </pre>
-        </div>
-
-        <div id="step1-lin" class="code-area" style="display:none;">
-            <button class="copy-btn" onclick="copyToClipboard('code1-lin')">Copiar</button>
-<pre id="code1-lin">
-# En Linux, usamos nano o tu editor preferido
-nano odoo-boot.sh
-
-# (Pega el contenido del script de abajo y guarda con Ctrl+O, Enter, Ctrl+X)
-</pre>
-        </div>
     </div>
 
-    <p style="margin-top:15px"><strong>Contenido del archivo <code>odoo-boot.sh</code></strong> (Copiar y pegar dentro del archivo):</p>
-    <div class="code-wrapper">
-        <div class="code-area">
-            <button class="copy-btn" onclick="copyToClipboard('boot-script')">Copiar Script</button>
-<pre id="boot-script" style="color: #9cdcfe;">#!/bin/bash
-# 1. Redirigir logs para depuración
-exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+    <!-- PASO 2 -->
+    <h2>2. Creación del Script</h2>
+    <p>Dentro de la carpeta <span class="folder">📂 UD4.PR0.ec2-desde-AMI</span> que acabas de crear, debes generar el siguiente archivo:</p>
+    <ul>
+        <li>Nombre del archivo: <span class="file">📄 odoo-boot.sh</span></li>
+        <li><strong>Contenido:</strong> Copia el código del <strong>Paso 1</strong> del archivo <code>manual_odoo.html</code>.</li>
+    </ul>
 
-echo "--- 1. Iniciando actualización del sistema (CRÍTICO) ---"
-sleep 20
-apt-get update
-apt-get upgrade -y
-apt-get install -y git curl
-
-echo "--- 2. Instalando Docker y Docker Compose ---"
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-usermod -aG docker ubuntu
-systemctl start docker
-systemctl enable docker
-
-echo "--- 3. Configurando SWAP (2GB) ---"
-fallocate -l 2G /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-swapon /swapfile
-echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
-echo "vm.swappiness=10" >> /etc/sysctl.conf
-sysctl -p
-
-echo "--- 4. Preparación de carpetas ---"
-mkdir -p /home/ubuntu/odoo18-l10n-spain
-chown -R ubuntu:ubuntu /home/ubuntu/odoo18-l10n-spain
-
-echo "--- Configuración completada ---"</pre>
-        </div>
-    </div>
-
-    <h2>2. Lanzar la Instancia en AWS</h2>
-    <p>Ahora ejecuta el comando para crear la máquina. Asegúrate de estar en la carpeta donde guardaste el archivo anterior.</p>
-    <div class="note">⚠️ <strong>Nota:</strong> Verifica que el <code>security-group-ids</code> y el <code>image-id</code> coinciden con los de tu laboratorio actual.</div>
-
-    <div class="code-wrapper">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab(2, 'win')">Windows (PowerShell)</div>
-            <div class="tab" onclick="switchTab(2, 'lin')">Linux Mint (Bash)</div>
-        </div>
-
-        <div id="step2-win" class="code-area">
-            <button class="copy-btn" onclick="copyToClipboard('code2-win')">Copiar</button>
-<pre id="code2-win">
-aws ec2 run-instances `
-    --image-id ami-02e6a6320478bf846 `
-    --count 1 `
-    --instance-type t4g.small `
-    --key-name vockey `
-    --security-group-ids sg-0923c5b8a3a1b63c4 `
-    --block-device-mappings '[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":25,\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]' `
-    --user-data file://odoo-boot.sh `
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Odoo18Base-<span class="dynamic-siglas">SIGLAS</span>}]'
-</pre>
-        </div>
-
-        <div id="step2-lin" class="code-area" style="display:none;">
-            <button class="copy-btn" onclick="copyToClipboard('code2-lin')">Copiar</button>
-<pre id="code2-lin">
-aws ec2 run-instances \
-    --image-id ami-02e6a6320478bf846 \
-    --count 1 \
-    --instance-type t4g.small \
-    --key-name vockey \
-    --security-group-ids sg-0923c5b8a3a1b63c4 \
-    --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":25,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
-    --user-data file://odoo-boot.sh \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Odoo18Base-<span class="dynamic-siglas">SIGLAS</span>}]'
-</pre>
-        </div>
-    </div>
-
-    <h2>3. Obtener la IP Pública</h2>
-    <p>Espera unos 30 segundos y ejecuta esto para ver tu IP.</p>
-
-    <div class="code-wrapper">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab(3, 'win')">Windows (PowerShell)</div>
-            <div class="tab" onclick="switchTab(3, 'lin')">Linux Mint (Bash)</div>
-        </div>
-
-        <div id="step3-win" class="code-area">
-            <button class="copy-btn" onclick="copyToClipboard('code3-win')">Copiar</button>
-<pre id="code3-win">
-aws ec2 describe-instances `
-    --filters "Name=tag:Name,Values=Odoo18Base-<span class="dynamic-siglas">SIGLAS</span>" "Name=instance-state-name,Values=running" `
-    --query "Reservations[*].Instances[*].[PublicIpAddress]" `
-    --output text
-</pre>
-        </div>
-
-        <div id="step3-lin" class="code-area" style="display:none;">
-            <button class="copy-btn" onclick="copyToClipboard('code3-lin')">Copiar</button>
-<pre id="code3-lin">
-aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=Odoo18Base-<span class="dynamic-siglas">SIGLAS</span>" "Name=instance-state-name,Values=running" \
-    --query "Reservations[*].Instances[*].[PublicIpAddress]" \
-    --output text
-</pre>
-        </div>
-    </div>
-
-    <h2>4. Verificación Final</h2>
-    <p>Conéctate por SSH (usando tu clave <code>labsuser.pem</code> o <code>vockey.pem</code>) y comprueba que la instalación automática ha terminado. Sustituye <code>IP_PUBLICA</code> por la que obtuviste arriba.</p>
+    <!-- PASO 3 -->
+    <h2>3. Ejecución y Documentación</h2>
+    <p>Sigue los pasos del Manual Interactivo para lanzar la instancia en AWS. Mientras lo haces, crea un documento llamado <span class="file">📄 memoria_despliegue.pdf</span> con las siguientes capturas:</p>
     
-    <div class="code-wrapper">
-        <div class="code-area">
-            <button class="copy-btn" onclick="copyToClipboard('ssh-check')">Copiar</button>
-<pre id="ssh-check">
-# Conectar
-ssh -i labsuser.pem ubuntu@IP_PUBLICA
+    <ul class="checklist">
+        <li><strong>Captura 1:</strong> El comando de lanzamiento en la terminal justo antes de pulsar Enter (debe verse el uso de <code>--user-data file://odoo-boot.sh</code>).</li>
+        <li><strong>Captura 2:</strong> La consola de AWS mostrando la instancia en estado "En ejecución" y tipo <code>t4g.small</code>.</li>
+        <li><strong>Captura 3:</strong> Tu terminal SSH mostrando el log final con el mensaje <em>"--- Configuración completada ---"</em>.</li>
+        <li><strong>Captura 4 (Opcional):</strong> El navegador web mostrando Odoo cargando en la IP pública.</li>
+    </ul>
 
-# Una vez dentro, ver el log en tiempo real:
-tail -f /var/log/user-data.log
+    <!-- PASO 4 -->
+    <h2>4. Entrega (Git Workflow)</h2>
+    <p>Sube tu trabajo al repositorio remoto ejecutando los siguientes comandos:</p>
+
+    <div class="code-area">
+        <button class="copy-btn" onclick="copyToClipboard('git-push')">Copiar Comandos</button>
+<pre id="git-push">
+# Añadir los archivos al área de preparación
+git add UD4.PR0.ec2-desde-AMI/
+
+# Confirmar los cambios
+git commit -m "Añado práctica UD4.PR0 despliegue Odoo desde AMI - <span class="dynamic-siglas">SIGLAS</span>"
+
+# Subir al repositorio remoto
+git push
 </pre>
-        </div>
     </div>
-    <p>Cuando veas el mensaje <strong>"--- Configuración completada ---"</strong>, pulsa <code>Ctrl + C</code>. ¡Tu servidor está listo para recibir el Docker Compose!</p>
+
+    <div class="warning-box">
+        <strong>⚠️ SEGURIDAD CRÍTICA:</strong><br>
+        NUNCA subas tu archivo de claves <code>.pem</code> al repositorio. Si lo haces, tu cuenta de AWS quedará comprometida y suspensa.
+    </div>
+
+    <footer>
+        <p>Sistemas de Gestión Empresarial - 2025</p>
+    </footer>
 
 </div>
 
 <script>
-    // Función para actualizar las siglas en tiempo real
     function updateCode() {
         const initials = document.getElementById('initials').value || 'SIGLAS';
         const spans = document.querySelectorAll('.dynamic-siglas');
@@ -222,49 +149,19 @@ tail -f /var/log/user-data.log
         });
     }
 
-    // Función para cambiar pestañas (Win vs Linux)
-    function switchTab(step, os) {
-        // Ocultar todos los bloques de código del paso actual
-        document.getElementById(`step${step}-win`).style.display = 'none';
-        document.getElementById(`step${step}-lin`).style.display = 'none';
-        
-        // Desactivar pestañas
-        const tabs = document.querySelectorAll(`.code-wrapper:nth-of-type(${step > 1 ? step - 1 : 1}) .tab`); // Selección simplificada para demo
-        // En un caso real seleccionamos por padre, aquí lo haremos simple por ID de bloque
-        const parent = document.getElementById(`step${step}-${os}`).parentElement;
-        const localTabs = parent.querySelectorAll('.tab');
-        localTabs.forEach(t => t.classList.remove('active'));
-
-        // Mostrar el seleccionado
-        document.getElementById(`step${step}-${os}`).style.display = 'block';
-        
-        // Activar pestaña visualmente (un poco hacky pero funciona sin IDs únicos en tabs)
-        if(os === 'win') localTabs[0].classList.add('active');
-        else localTabs[1].classList.add('active');
-    }
-
-    // Función de copiado al portapapeles
     function copyToClipboard(elementId) {
         const el = document.getElementById(elementId);
         const text = el.innerText;
         
         navigator.clipboard.writeText(text).then(() => {
-            alert("¡Código copiado al portapapeles!");
+            const btn = document.querySelector(`#${elementId}`).parentElement.querySelector('.copy-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "¡Copiado!";
+            setTimeout(() => { btn.innerText = originalText; }, 2000);
         }).catch(err => {
             console.error('Error al copiar: ', err);
         });
     }
-    
-    // Inicializar listeners de pestañas correctamente
-    document.querySelectorAll('.tabs').forEach((tabContainer, index) => {
-        const stepNum = index === 0 ? 1 : (index === 1 ? 2 : 3); // Mapeo de índices a pasos
-        if(index > 2) return; // Solo hay 3 pasos con pestañas dobles
-        
-        const tabs = tabContainer.querySelectorAll('.tab');
-        tabs[0].onclick = () => switchTab(stepNum, 'win');
-        tabs[1].onclick = () => switchTab(stepNum, 'lin');
-    });
-
 </script>
 
 </body>
